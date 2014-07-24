@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from Imaging cimport Imaging
 from libimagequant cimport  *
+from libc.string cimport memcpy
 from cpython cimport array
 from array import array
 
