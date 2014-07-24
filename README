@@ -1,0 +1,9 @@
+Python binding for library libimagequant by Kornel Lesiński which is a core of
+pngquant program.
+
+Binding does not depend on shared library as whole libimagequant library is compilied into it.
+
+Compiled with libimagequant version 1.3.0.
+
+pngquant and libimagequant home page: http://pngquant.org/lib/
+pngquant sources: https://github.com/pornel/pngquant
