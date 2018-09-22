@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import Image
+from PIL import Image
 import imagequant
 
 def save_pil_png(filename, img, size, palette):
@@ -26,5 +26,6 @@ im = get_sample_image()
 quantized = imagequant.quantize_image(im, 10, 1)
 print quantized['quantization_error']
 print quantized['quantization_quality']
-save_pil_png('export.png', quantized['image'], quantized['size'], quantized['palette'])
+im.save('orig.png')
+save_pil_png('quantized.png', quantized['image'], quantized['size'], quantized['palette'])
 
