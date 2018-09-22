@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from Imaging cimport Imaging
 from libimagequant cimport  *
 from libc.string cimport memcpy
 from cpython cimport array
@@ -7,7 +6,8 @@ from array import array
 
 def quantize_image(im, colors, speed):
     cdef: 
-        Imaging im_props
+        bytes in_img_b
+        char* in_img
         array.array out_img
         array.array out_palette
         size_t palette_size
@@ -15,15 +15,15 @@ def quantize_image(im, colors, speed):
         double quantization_quality, quantization_error
     im.load()
     im = im.convert('RGBA')
-    im_props = <Imaging><Py_ssize_t>im.im.id
-    width = im_props.xsize
-    height = im_props.ysize
+    in_img_b = im.tobytes()
+    in_img = in_img_b
+    width, height = im.size
     pixels_n = width * height
     out_img = array('B', [])
     array.resize(out_img, pixels_n)
     out_palette = array('B', [])
     array.resize(out_palette, 1024)
-    _quantize_image(colors, speed, im_props.block, width, height,
+    _quantize_image(colors, speed, in_img, width, height,
                     out_img.data.as_voidptr, pixels_n, out_palette.data.as_voidptr, &palette_size,
                     &quantization_error, &quantization_quality)
     array.resize(out_palette, palette_size * 4)
@@ -54,9 +54,11 @@ cdef check_error(liq_error er, function):
             msg = bytes('Unknown error %d' % er)
         raise Exception('Error in function %s in libimagequant: %s' % (function, msg))
 
-cdef check_not_null(void *p):
+
+cdef check_not_null(void* p, func_name):
     if p is NULL:
-        raise Exception('libimagequant returned null pointer')
+        raise Exception('function %s returned null pointer' % func_name)
+
 
 cdef _quantize_image(int colors_n, int speed, void *bitmap, int width, int height,
                      void *out_buf, size_t out_buf_size, void *palette, size_t *palette_size,
@@ -67,17 +69,17 @@ cdef _quantize_image(int colors_n, int speed, void *bitmap, int width, int heigh
         liq_result *res
         liq_palette *pal
     attr = liq_attr_create()
-    check_not_null(attr)
+    check_not_null(attr, 'liq_attr_create')
     check_error(liq_set_max_colors(attr, colors_n), 'liq_set_max_colors')
     check_error(liq_set_speed(attr, speed), 'liq_set_speed')
-
+    check_not_null(bitmap, 'bitmap')
     image = liq_image_create_rgba(attr, bitmap, width, height, 0)
-    check_not_null(image)
+    check_not_null(image, 'liq_image_create_rgba')
     res = liq_quantize_image(attr, image)
-    check_not_null(res)
+    check_not_null(res, 'liq_quantize_image')
     check_error(liq_write_remapped_image(res, image, out_buf, out_buf_size), 'liq_write_remapped_image')
     pal = liq_get_palette(res)
-    check_not_null(pal)
+    check_not_null(pal, 'liq_get_palette')
     memcpy(palette, &pal.entries[0], 1024)
     palette_size[0] = pal.count
     quantization_error[0] = liq_get_quantization_error(res)
