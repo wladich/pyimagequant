@@ -9,5 +9,7 @@ ext = Extension('imagequant', ['imagequant/imagequant.pyx'] +
 
 setup(
   name = 'imagequant',
-  ext_modules = cythonize(ext)
+  ext_modules = cythonize(ext),
+  install_requires = [
+    'Cython>=0.29']
 )
