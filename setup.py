@@ -2,14 +2,15 @@ from setuptools import setup, Extension
 from Cython.Build import cythonize
 from glob import glob
 
-ext = Extension('imagequant', ['imagequant/imagequant.pyx'] +
-                              glob('pngquant/lib/*.c'), 
-                include_dirs=['pngquant/lib'],
-                extra_compile_args=['-std=c99'])
+ext = Extension(
+    "imagequant",
+    ["imagequant/imagequant.pyx"] + glob("pngquant/lib/*.c"),
+    include_dirs=["pngquant/lib"],
+    extra_compile_args=["-std=c99"],
+)
 
 setup(
-  name = 'imagequant',
-  ext_modules = cythonize(ext),
-  install_requires = [
-    'Cython>=0.29']
+    name="imagequant",
+    version="0.0.1",
+    ext_modules=cythonize(ext),
 )
